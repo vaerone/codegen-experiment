@@ -3,6 +3,10 @@ import path from "path";
 import { cleanJSON } from "../utils/cleanJSON.js";
 import { getProvider } from "./providers/index.js";
 
+const migration = (strings, ...values) => {
+  return strings.reduce((acc, s, i) => acc + s + (values[i] ?? ""), "");
+}
+
 function extractClassName(code) {
   const m = code.match(/class\s+([A-Za-z0-9_]+)/);
   return m ? m[1] : null;
@@ -20,12 +24,25 @@ export async function generatePlan(sourceCode, filePath, options) {
 
   const planPath = path.join(planDir, `${className}.plan.json`);
 
-  const prompt = `
-Convert this React class component into a structured migration plan JSON:
+  const prompt = migration`
+                    Convert the following React class component into a JSON migration plan.
 
-Return ONLY raw JSON.
-${sourceCode}
-`;
+                    ${source}
+
+                    Return ONLY valid JSON:
+                    {
+                      "name": "string",
+                      "state": {},
+                      "methods": {},
+                      "lifecycle": {
+                        "componentDidMount": null,
+                        "componentDidUpdate": null,
+                        "componentWillUnmount": null
+                      },
+                      "usesProps": boolean,
+                      "jsx": "<raw jsx>"
+                    }
+                  `;
 
   const raw = await callLLM(prompt);
   const cleaned = cleanJSON(raw);

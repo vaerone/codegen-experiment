@@ -5,7 +5,7 @@ import { getProvider } from "./providers/index.js";
 
 const migration = (strings, ...values) => {
   return strings.reduce((acc, s, i) => acc + s + (values[i] ?? ""), "");
-}
+};
 
 function extractClassName(code) {
   const m = code.match(/class\s+([A-Za-z0-9_]+)/);
@@ -27,7 +27,7 @@ export async function generatePlan(sourceCode, filePath, options) {
   const prompt = migration`
                     Convert the following React class component into a JSON migration plan.
 
-                    ${source}
+                    ${sourceCode}
 
                     Return ONLY valid JSON:
                     {
